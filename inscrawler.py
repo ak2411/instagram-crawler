@@ -9,8 +9,35 @@ from queue import Queue, Empty
 from threading import Thread
 import os
 import time
+import argparse
+import csv
+from itertools import islice
 
-## Crawler
+## Arguments from terminal
+parser = argparse.ArgumentParser()
+parser.add_argument("-f", "--filepath", type=str, help="Username filepath, default is ./users.csv", default="./users.csv")
+parser.add_argument("-i", "--index", type=int, help="Index of user you want to start with, default is 0", default=0)
+parser.add_argument("-n", "--num", type=int, help="Number of users to collect, default is 1", default=1)
+
+args = parser.parse_args()
+
+print("----- INSTAGRAM CRAWLER -----")
+print(" Filepath:", args.filepath)
+print(" Start from index:", args.index)
+print(" Number of users to crawl:", args.num)
+print("----------------------------")
+users = []
+
+# Get usernames from CSV file
+# CSV file should have username at the very left of the row
+try:
+    with open(args.filepath) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        for row in islice(csv_reader, args.index, args.index+args.num):
+            users.append(row[0])    # Change 0 to whichever index that contains username
+    print("Collected ", len(users), " user(s) to crawl")
+except Exception as e:
+    print(e)
 
 def main_inscrawler(who='/beyonce'):
     url_list = []
@@ -125,9 +152,9 @@ def main_inscrawler(who='/beyonce'):
                 retries = retries + 1
                 print("Retries:", retries)
                 continue
-        with open(folder_path+'data.txt', 'w+') as outfile:  
+        with open(folder_path+'data.txt', 'w+') as outfile:
             json.dump(user_data, outfile)
-        
+
     def retry(session, next, attempts=10, wait=600):
         for i in range(attempts):
             response = session.get(next)
@@ -162,35 +189,6 @@ def main_inscrawler(who='/beyonce'):
     download_images(url_list, name_list, who)
 
 ## Crawler Threading
-#starts at liam payne
-users = [
-         "chiaraferragni", "tataweneck", "jairmessiasbolsonaro",
-         "daquan", "iambeckyg",
-         "nickyjampr",
-         "lilyjcollins"]
-#failed: nickiminaj, 
-
-users = ["instagram", "fcbarcelona", "nasa", "nike", "realmadrid", "natgeo"]
-
-users = ["nickiminaj", "mosalah", "gigihadid", "davidbeckham", "camimendes", "shakira",
-         "priyankachopra", "zacefron", "paulodybala", "roses_are_rosie",
-         "milliebobbybrown", "chrishemsworth", "ladygaga", "colesprouse",
-         "aliaabhatt", "k.mbappe", "sooyaaa__", "lilireinhart", "brunamarquezine",
-         "real__pcy", "maluma", "danbilzerian", "thenotoriousmma", "narendramodi",
-         "hazardeden_10", "marcelotwelve", "vindiesel", "lizakoshy", "jamescharles",
-         "madelame", "justintimberlake", "paulpogba", "cohsehun", "kevinhart4real",
-         "sophiet", "mileycyrus", "dualipa", "beingsalmankhan", "garethbale11",
-         "ronaldinho", "akshaykumar", "jasonstatham", "travisscott", "caradelevingne",
-         "pewdiepie", "blackpinkofficial", "vancityreynolds", "karolg", 
-         "shraddhakapoor", "adele", "iamzlatanibrahimovic", "katrinakaif", "sergioramos",
-         "eminem", "stephencurry30", "katyperry", "gal_gadot", "emrata",
-         "baekhyunee_exo", "brunomars", "ncentineo", "willsmith", "bts.bighitofficial",
-         "brentrivera", "jacquelinef143", "lilpump", "amandacerny", "maeriliamendoncaca",
-         "anushkasharma", "eljuanpazurita", "dishapatani", "bretmanrock", "nehakakkar",
-         "luissuarez9", "iamsrk", "prattprattpratt", "ranveersingh", "shahidkapoor"]
-
-users = ["kevinhart4real", "nickiminaj"]
-users = ["natgeo"]
 def generate_folders():
     #add this when you have hard disk connected
     #os.chdir("/Volumes/My Passport")
@@ -229,4 +227,7 @@ def threaded_crawler():
         process.start()
     q.join()
     return results
-# threaded_crawler()
+
+if __name__ == "__main__":
+    print("Starting Crawler")
+    threaded_crawler()
