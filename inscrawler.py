@@ -18,6 +18,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-f", "--filepath", type=str, help="Username filepath, default is ./users.csv", default="./users.csv")
 parser.add_argument("-i", "--index", type=int, help="Index of user you want to start with, default is 0", default=0)
 parser.add_argument("-n", "--num", type=int, help="Number of users to collect, default is 1", default=1)
+parser.add_argument("-s", "--save", type=str, help="Filepath to save images into, default is ./Influencers", default="./Influencers")
 
 try:
     args = parser.parse_args()
@@ -29,8 +30,10 @@ print("----- INSTAGRAM CRAWLER -----")
 print(" Filepath:", args.filepath)
 print(" Start from index:", args.index)
 print(" Number of users to crawl:", args.num)
+print(" Save images to:", args.save)
 print("----------------------------")
 users = []
+SAVE_FILEPATH = args.save
 
 # Get usernames from CSV file
 # CSV file should have username at the very left of the row
@@ -135,7 +138,8 @@ def main_inscrawler(who='/beyonce'):
 
     def download_images(url_list, name_list, user):
         #os.chdir("/Volumes/My Passport")
-        folder_path = "Influencers" + user
+        global SAVE_FILEPATH
+        folder_path = SAVE_FILEPATH + user
         retries = 0
         user_data = dict()
         user_data[user] = []
@@ -193,7 +197,8 @@ def main_inscrawler(who='/beyonce'):
 def generate_folders():
     #add this when you have hard disk connected
     #os.chdir("/Volumes/My Passport")
-    path = "Influencers"
+    global SAVE_FILEPATH
+    path = SAVE_FILEPATH
     for name in users:
         path_name = path + "/" + name
         try:
@@ -202,7 +207,7 @@ def generate_folders():
             print(path_name + " already made!")
 
 def threaded_crawler():
-    # generate_folders()
+    generate_folders()
     results = dict()
     threads = []
     q = Queue()
